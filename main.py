@@ -1,19 +1,23 @@
-from telethon import TelegramClient, events
-import asyncio
+import telegram
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 
-import config as cfg
+def start(update: telegram.Update, context: CallbackContext) -> None:
+    update.message.reply_text('Hello!')
 
-app = TelegramClient('Telethon_UserBot', cfg.API_ID, cfg.API_HASH)
+def echo(update: telegram.Update, context: CallbackContext) -> None:
+    update.message.reply_text(update.message.text)
 
-@app.on(events.NewMessage())
-async def on_message(event: events.NewMessage.Event):
-    print(event.chat_id, event.message.message)
-    await event.message.reply('Hello from Telethon UserBot!')
+def main() -> None:
+    updater = Updater("8252412070:AAGBh9V3LVAvWOvjXicO6NQgIVIDd5eLtdA", use_context=True)
+    
+    dispatcher = updater.dispatcher
 
-if __name__ == "__main__":
-    try:
-        print('App Started')
-        app.start(phone=cfg.PHONE, password=cfg.TWO_STEP_PASS)
-        app.run_until_disconnected()
-    except KeyboardInterrupt:
-        print('App Finished')
+
+    dispatcher.add_handler(CommandHandler("start", start)) # pyright: ignore[reportOptionalMemberAccess]
+    
+    dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, echo)) # pyright: ignore[reportOptionalMemberAccess]
+
+    updater.start_polling()
+    updater.idle()
+if __name__ == '__main__':
+    main()
